@@ -16,7 +16,7 @@ static const char * call_to_action(const enum command_types type, char * string,
             ret = toReturn;
             break;
         case GET_DATE:
-            sprintf(toReturn,"%d-%02d-%02d\r\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+            sprintf(toReturn,"%02d-%02d-%d\r\n",tm.tm_mday, tm.tm_mon + 1,  tm.tm_year + 1900);
             ret = toReturn;
             break;
         case GET_TIME:
