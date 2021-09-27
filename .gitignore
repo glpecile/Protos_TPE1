@@ -7,3 +7,5 @@ cmake-build-default
 CMakeLists.txt
 
 server
+
+server.dSYM/Contents/

@@ -11,6 +11,8 @@
 #include <netdb.h>
 #include "../include/tools.h"
 #include "../include/logger.h"
+#include "../include/executioner.h"
+
 
 
 #define DEFAULT_PORT 9999 //Preferred port
@@ -31,12 +33,17 @@ int main(int argc, char* argv[]) {
     //Buffer of 100
     char buffer[BUFF_SIZE];
 
+    //initialize executioner
+    init_executioner();
+
     int opt = TRUE;
     int master_socket , addrlen , new_socket , max_sd , activity, i , valread , sd;
     int client_socket[MAX_CLIENTS] = {0};
     struct sockaddr_in address;
     //set of socket descriptors
     fd_set readfds;
+
+
 
     char * message = "ECHO Daemon v1.0\r\n";
 
@@ -143,7 +150,8 @@ int main(int argc, char* argv[]) {
             sd = client_socket[i];
             if (FD_ISSET(sd, &readfds)) {
                 //check if it was for closing, and also the incoming message
-                if ((valread = read(sd, buffer, BUFF_SIZE)) < 0) { //CHECKEAR PORQUE ACA LO CAMBIAMOS DE == 0 A < 0
+                valread = read(sd, buffer, BUFF_SIZE);
+                if (valread  <= 0) { //CHECKEAR PORQUE ACA LO CAMBIAMOS DE == 0 A < 0
                     //A client got disconnected, print details.
                     getpeername(sd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
                     printf("Host disconnected , ip %s , port %d \n" , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
@@ -154,9 +162,12 @@ int main(int argc, char* argv[]) {
                 }
                     //echo back the message that came in
                 else {
-                    //set the string terminating NULL byte on the end of the data read
+                    const char * toReturn;
                     buffer[valread] = '\0';
-                    send(sd, buffer, strlen(buffer), 0);
+                    toReturn = execute(buffer);
+                    //set the string terminating NULL byte on the end of the data read
+                    send(sd, toReturn, strlen(toReturn), 0);
+                    reset_parser_executioner();
                 }
             }
         }
