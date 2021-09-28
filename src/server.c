@@ -19,9 +19,16 @@
 #define MAX_ARGS  2
 #define MAX_CLIENTS 30
 #define PENDING_CONNECTIONS 3
-#define BUFF_SIZE 101
 #define SET_EMPTY -1 //used init for client fd
 #define IS_EMPTY(sd) (sd == SET_EMPTY)
+static void clean_read_buffer(int fd){
+    char buffer = ' ';
+    char old_buffer = ' ';
+    while(!(buffer == '\n' && old_buffer == '\r')) {
+        old_buffer = buffer;
+        read(fd, &buffer, 1);
+    }
+}
 int main(int argc, char* argv[]) {
 
     if(argc > MAX_ARGS ) {
@@ -151,6 +158,7 @@ int main(int argc, char* argv[]) {
             if (FD_ISSET(sd, &readfds)) {
                 //check if it was for closing, and also the incoming message
                 valread = read(sd, buffer, BUFF_SIZE);
+                //clean_read_buffer(sd);
                 if (valread  <= 0) { //CHECKEAR PORQUE ACA LO CAMBIAMOS DE == 0 A < 0
                     //A client got disconnected, print details.
                     getpeername(sd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
@@ -170,6 +178,7 @@ int main(int argc, char* argv[]) {
                     reset_parser_executioner();
                 }
             }
+
         }
     }
 
