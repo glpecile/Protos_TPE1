@@ -12,7 +12,7 @@
 #include "../include/tools.h"
 #include "../include/logger.h"
 #include "../include/executioner.h"
-
+#include "../include/client.h"
 
 
 #define DEFAULT_PORT 9999 //Preferred port
@@ -21,6 +21,7 @@
 #define PENDING_CONNECTIONS 3
 #define SET_EMPTY -1 //used init for client fd
 #define IS_EMPTY(sd) (sd == SET_EMPTY)
+static t_client * clients[MAX_CLIENTS] = {NULL};
 static void clean_read_buffer(int fd){
     char buffer = ' ';
     char old_buffer = ' ';
@@ -105,17 +106,20 @@ int main(int argc, char* argv[]) {
         //add child sockets to set
         for (i = 0; i < MAX_CLIENTS; i++) {
             //socket descriptor
-            sd = client_socket[i];
+//            sd = client_socket[i];
+            if(clients[i] != NULL) {
+                sd = clients[i]->fd;
+                //if valid socket descriptor then read list
+                if (!IS_EMPTY(sd)) {
+                    FD_SET(sd, &readfds);
+                }
 
-            //if valid socket descriptor then read list
-            if (!IS_EMPTY(sd)) {
-                FD_SET(sd, &readfds);
+                //highest file descriptor number, need it for the select function
+                if (sd > max_sd) {
+                    max_sd = sd;
+                }
             }
 
-            //highest file descriptor number, need it for the select function
-            if (sd > max_sd) {
-                max_sd = sd;
-            }
         }
         //waiting for one of the sockets, timeout is NULL.
         activity = select(max_sd + 1, &readfds, NULL, NULL, NULL);
@@ -144,41 +148,62 @@ int main(int argc, char* argv[]) {
             //add new socket socket to array of sockets
             for (i = 0; i < MAX_CLIENTS; i++) {
                 //if position is empty
-                if (IS_EMPTY(client_socket[i])) {
-                    client_socket[i] = new_socket;
+//                if (IS_EMPTY(client_socket[i])) {
+//                    client_socket[i] = new_socket;
+//                    printf("Adding to list of sockets as %d\n", i);
+//                    break;
+//                }
+                if (clients[i] == NULL) {
+                    clients[i] = init_client(new_socket);
                     printf("Adding to list of sockets as %d\n", i);
                     break;
                 }
             }
         }
 
+        //ISSET UDP -> TODA SU LOGICA
+
         //if it's some IO operation regarding one of the "old" clients.
         for (i = 0; i < MAX_CLIENTS; i++) {
-            sd = client_socket[i];
-            if (FD_ISSET(sd, &readfds)) {
-                //check if it was for closing, and also the incoming message
-                valread = read(sd, buffer, BUFF_SIZE);
-                //clean_read_buffer(sd);
-                if (valread  <= 0) { //CHECKEAR PORQUE ACA LO CAMBIAMOS DE == 0 A < 0
-                    //A client got disconnected, print details.
-                    getpeername(sd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
-                    printf("Host disconnected , ip %s , port %d \n" , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
+//            sd = client_socket[i];
+            if(clients[i] != NULL){
+                printf("Checking client number %d\n", sd);
+                sd = clients[i]->fd;
+                if (FD_ISSET(sd, &readfds)) {
+                    printf("Client number %d is talking...\n", sd);
+                    char c;
+                    //check if it was for closing, and also the incoming message
+                    valread = read(sd, &c, 1);
+                    //clean_read_buffer(sd);
+                    if (valread  <= 0) { //CHECKEAR PORQUE ACA LO CAMBIAMOS DE == 0 A < 0
+                        //A client got disconnected, print details.
+                        getpeername(sd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
+                        printf("Host disconnected , ip %s , port %d \n" , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
 
-                    //Close the socket and mark as SET_EMPTY in list for reuse
-                    close(sd);
-                    client_socket[i] = SET_EMPTY;
-                }
-                    //echo back the message that came in
-                else {
-                    const char * toReturn;
-                    buffer[valread] = '\0';
-                    toReturn = execute(buffer);
-                    //set the string terminating NULL byte on the end of the data read
-                    send(sd, toReturn, strlen(toReturn), 0);
-                    reset_parser_executioner();
+                        //Close the socket and mark as SET_EMPTY in list for reuse
+                        close(sd);
+                        client_socket[i] = SET_EMPTY;
+                    }
+                        //echo back the message that came in
+                    else {
+                        if(write_client(clients[i],c)){
+                            if(is_full(clients[i])){
+                                //limpio el buffer del read.
+                            }
+                            const char * to_send;
+                            char * read_ret = read_client(clients[i]);
+                            if(read_ret != NULL) {
+                                to_send = execute(read_ret);
+                                send(sd, to_send, strlen(to_send), 0);
+                                reset_parser_executioner();
+                            }
+                            //set the string terminating NULL byte on the end of the data read
+
+                        }
+
+                    }
                 }
             }
-
         }
     }
 
