@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     //Defining port: DEFAULT_PORT or the port given by the user.
     int port = (argc == 1) ? DEFAULT_PORT : atoi(argv[1]);
 
-    int master_socket, addrlen, new_socket, max_sd, activity, i, valread, sd;
+    int master_socket, addrlen, max_sd, activity;
     int udp_socket;
     struct sockaddr_in address;
     fd_set readfds; //set of socket descriptors

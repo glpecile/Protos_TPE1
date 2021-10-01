@@ -9,6 +9,7 @@
 #include "../include/tools.h"
 #include "../include/client.h"
 #include "../include/executioner.h"
+#include "../include/server_utils.h"
 
 #define PENDING_CONNECTIONS 3
 
@@ -16,29 +17,7 @@
 #define IS_EMPTY(sd) (sd == SET_EMPTY)
 
 int setup_tcp_server_socket(const int port, struct sockaddr_in *address) {
-    int opt = TRUE;
-    int master_socket;
-
-    //master socket TCP created.
-    if ((master_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        log(FATAL, "socket failed");
-    }
-
-    //set master socket to allow multiple connections.
-    if (setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt)) < 0) {
-        log(FATAL, "setsockopt");
-    }
-
-    //type of socket address created
-    address->sin_family = AF_INET;
-    address->sin_addr.s_addr = INADDR_ANY;
-    address->sin_port = htons(port);
-
-    //bind the master socket.
-    if (bind(master_socket, (struct sockaddr *) address, sizeof(*address)) < 0) {
-        log(FATAL, "bind failed")
-    }
-    printf("Listener on port %d\n", port);
+    int master_socket = setup_server_socket(port, address, SOCK_STREAM);
 
     //try to specify maximum of 3 pending connections for the master socket
     if (listen(master_socket, PENDING_CONNECTIONS) < 0) {
