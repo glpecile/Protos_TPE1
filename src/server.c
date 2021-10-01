@@ -181,9 +181,12 @@ int main(int argc, char* argv[]) {
                         //Close the socket and mark as SET_EMPTY in list for reuse
                         close(sd);
                         client_socket[i] = SET_EMPTY;
+                        destroy_client(clients[i]);
+                        clients[i] = NULL;
                     }
                         //echo back the message that came in
                     else {
+                        printf("About to write %c\n", c);
                         if(write_client(clients[i],c)){
                             if(is_full(clients[i])){
                                 //limpio el buffer del read.
