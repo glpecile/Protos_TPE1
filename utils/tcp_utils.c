@@ -55,36 +55,51 @@ int fill_set(int master_socket, fd_set *readfds, t_client *clients[]) {
     return max_sd;
 }
 
-void handle_incoming_connection(int master_socket, struct sockaddr_in *address, int addrlen, t_client *clients[]) {
+void handle_incoming_connection(int master_socket, struct sockaddr_in *address, int addrlen, t_client *clients[],
+                                int *current_tcp_clients) {
     int new_socket;
     char *message = "ECHO Daemon v1.0\r\n";
+    char *full_server_msg = "The server is full\r\n";
 
     if ((new_socket = accept(master_socket, (struct sockaddr *) address, (socklen_t *) &addrlen)) < 0) {
         log(FATAL, "accept failed.");
     }
-    post_connections();
+
     //inform user of socket number - used in send and receive commands
     printf("New connection, socket fd is %d, ip is: %s, port: %d \n", new_socket, inet_ntoa(address->sin_addr),
            ntohs(address->sin_port));
 
-    //send new connection greeting message
-    if (send(new_socket, message, strlen(message), 0) != strlen(message)) {
-        log(FATAL, "Send error");
-    }
+    if (*current_tcp_clients < MAX_CLIENTS) {
+        //send new connection greeting message
+        if (send(new_socket, message, strlen(message), 0) != strlen(message)) {
+            log(FATAL, "Send error");
+        }
 
-    printf("Welcome message sent successfully\n");
+        printf("Welcome message sent successfully\n");
 
-    //add new socket socket to array of sockets
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        if (clients[i] == NULL) {
-            clients[i] = init_client(new_socket);
-            printf("Adding to list of sockets as %d\n", i);
-            break;
+        //add new socket socket to array of sockets
+        for (int i = 0; i < MAX_CLIENTS; i++) {
+            if (clients[i] == NULL) {
+                clients[i] = init_client(new_socket);
+                printf("Adding to list of sockets as %d\n", i);
+                post_connections();
+                (*current_tcp_clients)++;
+                break;
+            }
+        }
+    } else {
+        if (send(new_socket, full_server_msg, strlen(full_server_msg), 0) != strlen(full_server_msg)) {
+            log(FATAL, "Send error");
+        }
+        log(INFO, "Server is full. Client connection rejected.\n");
+        if(close(new_socket) < 0) {
+            log(FATAL, "Close error");
         }
     }
 }
 
-void handle_tcp_clients(fd_set *readfds, struct sockaddr_in *address, int addrlen, t_client *clients[]) {
+void handle_tcp_clients(fd_set *readfds, struct sockaddr_in *address, int addrlen, t_client *clients[],
+                        int *current_tcp_clients) {
     int sd, valread;
     //if it's some IO operation regarding one of the "old" clients.
     for (int i = 0; i < MAX_CLIENTS; i++) {
@@ -107,6 +122,7 @@ void handle_tcp_clients(fd_set *readfds, struct sockaddr_in *address, int addrle
 //                        client_socket[i] = SET_EMPTY;
                     destroy_client(clients[i]);
                     clients[i] = NULL;
+                    (*current_tcp_clients)--;
                 }
                     //echo back the message that came in
                 else {

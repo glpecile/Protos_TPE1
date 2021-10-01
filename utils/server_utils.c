@@ -31,6 +31,9 @@ int setup_server_socket(const int port, struct sockaddr_in *address, int sock_ty
 
     //bind the master socket.
     if (bind(master_socket, (struct sockaddr *) address, sizeof(*address)) < 0) {
+        if(close(master_socket) < 0) {
+            log(FATAL, "close failed")
+        }
         log(FATAL, "bind failed")
     }
     printf("Listener on port %d\n", port);
