@@ -11,3 +11,7 @@
 int setup_udp_server_socket(const int port, struct sockaddr_in *address) {
     return setup_server_socket(port, address, SOCK_DGRAM);
 }
+
+void handle_udp_datagrams() {
+
+}
