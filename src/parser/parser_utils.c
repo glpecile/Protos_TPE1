@@ -3,28 +3,8 @@
 #include <ctype.h>
 
 #include "../../include/parser_utils.h"
-const char * get_ans(const enum command_types type, char * string, int position){
-    char * ret;
-    time_t t = time(NULL);
-    char time[100];
-    struct tm tm = *localtime(&t);
-    switch(type) {
-        case ECHO:
-            ret = string + position + 1;
-            break;
-        case GET_DATE:
-            sprintf(time,"%d-%02d-%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
-            ret = time;
-            break;
-        case GET_TIME:
-            sprintf(time,"%02d:%02d:%02d", tm.tm_hour, tm.tm_min, tm.tm_sec);
-            ret = time;
-            break;
-    }
-    return ret;
-}
 const char *
-parser_utils_strcmpi_event(const enum string_cmp_event_types type, char * string, int position, int * flag, const enum command_types cmd) {
+parser_utils_strcmpi_event(const enum string_cmp_event_types type) {
     const char *ret;
 
     switch(type) {
@@ -32,12 +12,10 @@ parser_utils_strcmpi_event(const enum string_cmp_event_types type, char * string
             ret = "wait(c)\r\n";
             break;
         case STRING_CMP_EQ:
-            ret = get_ans(cmd,string,position);
-            (*flag) = 0;
+            ret = "equals command\r\n";
             break;
         case STRING_CMP_NEQ:
             ret = "not a valid command.\r\n";
-            (*flag)--;
             break;
     }
     return ret;

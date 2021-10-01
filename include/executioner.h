@@ -13,13 +13,21 @@
 #define CMD_ECHO "echo "
 #define CMD_GET_DATE "get date"
 #define CMD_GET_TIME "get time"
+#define CMD_SET_LOCALE_ES "set locale es"
+#define CMD_SET_LOCALE_EN "set locale en"
 
 #define US_ASCII_LIMIT 127
-//enum command_types{
-//    ECHO,
-//    GET_DATE,
-//    GET_TIME,
-//};
+enum command_types{
+    ECHO,
+    GET_DATE,
+    GET_TIME,
+    SET_LOCALE_EN,
+    SET_LOCALE_ES
+};
+enum date_format{
+    EN,
+    ES
+};
 
 void init_executioner();
 
