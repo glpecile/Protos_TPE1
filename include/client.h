@@ -2,8 +2,11 @@
 #define PROTOS_TPE1_CLIENT_H
 #include <string.h>
 #include <stdlib.h>
-#define BUFF_SIZE 110
+#include <stdio.h>
+#define BUFF_SIZE 103
+#define BUFF_LIMIT BUFF_SIZE - 3
 #define MAX_CLIENTS 30
+#define US_ASCII_LIMIT 127
 #define TRUE 1
 #define FALSE 0
 typedef struct {

@@ -167,10 +167,8 @@ int main(int argc, char* argv[]) {
         for (i = 0; i < MAX_CLIENTS; i++) {
 //            sd = client_socket[i];
             if(clients[i] != NULL){
-                printf("Checking client number %d\n", sd);
                 sd = clients[i]->fd;
                 if (FD_ISSET(sd, &readfds)) {
-                    printf("Client number %d is talking...\n", sd);
                     char c;
                     //check if it was for closing, and also the incoming message
                     valread = read(sd, &c, 1);

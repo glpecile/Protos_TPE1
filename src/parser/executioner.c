@@ -21,14 +21,13 @@ static const char * call_to_action(const enum command_types type, char * string,
     switch(type) {
         case ECHO:
             len = strlen(string + position + 1);
+            printf("len: %d\n", len);
             if(check_ascii_validation((unsigned char*) (string + position + 1), len)) {
-                memcpy(toReturn, string + position + 1, len);
+                memcpy(toReturn, string + position + 1, len+1);
                 ret = toReturn;
-                printf("string valido: %s\n", string + position + 1);
             }
             else{
                 ret = "not a valid command. Only US-ASCII characters.";
-                printf("string invalido: %s\n", string + position + 1);
             }
             break;
         case GET_DATE:
@@ -47,7 +46,7 @@ static const char * event_to_action(const enum string_cmp_event_types type, char
 
     switch(type) {
         case STRING_CMP_MAYEQ:
-            ret = "waiting for argument\r\n";
+            ret = "Arguments missing\r\n";
             break;
         case STRING_CMP_EQ:
             ret = call_to_action(cmd,string,position);
@@ -78,7 +77,7 @@ void init_executioner(){
 const char * execute(char * string){
     int flag;
     int valread = strlen(string);
-    char * ans;
+    char * ans ="";
      const struct parser_event * current_event;
     //check if the cmd ends with \r\n
     flag = string[valread-1] == '\n' && string[valread-2] == '\r';
@@ -89,7 +88,6 @@ const char * execute(char * string){
         for(int j = 0; j < MAX_CMD; j++){
             if(to_parse[j]) {
                 if(string[i] <= US_ASCII_LIMIT){
-                    printf("char valido: %c\n", string[i]);
                     current_event = parser_feed(parsers[j], string[i]);
                     to_parse[j] = current_event->type == STRING_CMP_MAYEQ;
                     //se puede hacer la logica del flag aca.
@@ -102,8 +100,6 @@ const char * execute(char * string){
             }
         }
     }
-    if(flag && current_event->type == STRING_CMP_MAYEQ)
-        ans = "Command invalid, arguments are missing.\r\n";
     return ans;
 }
 

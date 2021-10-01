@@ -17,11 +17,19 @@ int write_client(t_client * client, char c){
     //falta chequear cant de char de buffer.
     if(client != NULL){
         int send = FALSE;
-        client->buffer[client->index] = c;
-        if(client->index != 0 && (c == '\n' && client->buffer[client->index-1] == '\r')){
-            client->buffer[client->index++]='\0';
+        if(c >= US_ASCII_LIMIT || client->index >= BUFF_LIMIT){
             send = TRUE;
+            client->buffer[client->index ++] = '\r';
+            client->buffer[client->index ++] = '\n';
+            client->buffer[client->index + 1] = '\0';
+        }else{
+            client->buffer[client->index] = c;
+            if((client->index != 0 && (c == '\n' && client->buffer[client->index-1] == '\r'))){
+                client->buffer[client->index+1]='\0';
+                send = TRUE;
+            }
         }
+        client->index++;
         return send;
     }
     return 0;
