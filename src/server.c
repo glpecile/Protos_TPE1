@@ -20,8 +20,6 @@
 #define MAX_ARGS  2
 #define MAX_CLIENTS 30
 
-#define MAXSTRINGLENGTH 100 //TODO Borrar
-
 static t_client *clients[MAX_CLIENTS] = {NULL};
 
 int main(int argc, char *argv[]) {
@@ -38,7 +36,6 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in tcp_address;
     struct sockaddr_in udp_address;
     int tcp_addrlen;
-    int udp_addrlen;
     fd_set readfds; //set of socket descriptors
 
 
@@ -57,7 +54,7 @@ int main(int argc, char *argv[]) {
 
     //accept the incoming connection
     tcp_addrlen = sizeof(tcp_address);
-    udp_addrlen = sizeof(udp_address);
+
     puts("Waiting for connections ...");
 
     while (TRUE) {
@@ -80,30 +77,7 @@ int main(int argc, char *argv[]) {
 
         handle_tcp_clients(&readfds, &tcp_address, tcp_addrlen, clients);
 
-        if(FD_ISSET(udp_socket, &readfds)) {
-            struct sockaddr_storage clntAddr; 			// Client address
-            // Set Length of client address structure (in-out parameter)
-            socklen_t clntAddrLen = sizeof(clntAddr);
-
-            // Block until receive message from a client
-            char buffer[MAXSTRINGLENGTH];
-
-            errno = 0;
-            // Como alternativa a recvfrom se puede usar recvmsg, que es mas completa, por ejemplo permite saber
-            // si el mensaje recibido es de mayor longitud a MAXSTRINGLENGTH
-            ssize_t numBytesRcvd = recvfrom(udp_socket, buffer, MAXSTRINGLENGTH, 0, (struct sockaddr *) &clntAddr, &clntAddrLen);
-            if (numBytesRcvd < 0) {
-                log(ERROR, "recvfrom() failed: %s ", strerror(errno))
-                continue;
-            }
-
-            // Send received datagram back to the client
-            ssize_t numBytesSent = sendto(udp_socket, buffer, numBytesRcvd, 0, (struct sockaddr *) &clntAddr, sizeof(clntAddr));
-            if (numBytesSent < 0)
-            log(ERROR, "sendto() failed")
-            else if (numBytesSent != numBytesRcvd)
-            log(ERROR, "sendto() sent unexpected number of bytes");
-        }
+        handle_udp_datagrams(&readfds, udp_socket);
     }
     return 0;
 }

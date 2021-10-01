@@ -39,7 +39,7 @@ void init_executioner();
 
 const char *execute(char *string, const enum connection_type con_type);
 
-void reset_parser_executioner();
+void reset_parser_executioner(const enum connection_type con_type);
 
 void destroy_executioner();
 

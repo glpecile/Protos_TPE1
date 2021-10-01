@@ -52,7 +52,9 @@ static const char *event_to_action(const enum string_cmp_event_types type, char 
         case STRING_CMP_EQ:
             ret = call_to_action(cmd, string, position);
             (*flag) = 0;
-            post_correct_lines();
+            if(cmd < MAX_CMD_TCP) {
+                post_correct_lines();
+            }
             break;
         case STRING_CMP_NEQ:
             ret = "Not a valid command.Try again!\r\n";
@@ -96,21 +98,27 @@ const char *execute(char *string, const enum connection_type con_type){
     flag = max_cmd;
     struct parser **parsers = con_type == TCP ? parsers_tcp : parsers_udp;
     int * to_parse = con_type == TCP ? to_parse_tcp : to_parse_udp;
-    for (int i = 0; i<valread && string[i] != '\r' && flag; i++) {
-        for (int j = 0; j < max_cmd && flag; j++) {
-            if (to_parse[j]) {
-                current_event = parser_feed(parsers[j], string[i]);
-                to_parse[j] = current_event->type == STRING_CMP_MAYEQ;
-                ans = (char *) event_to_action(current_event->type, string, i, &flag, j);
+    int offset = con_type == TCP ? 0 : MAX_CMD_TCP;
+    for (int str_pos = 0; str_pos < valread && string[str_pos] != '\r' && flag; str_pos++) {
+        for (int parser = 0; parser < max_cmd && flag; parser++) {
+            if (to_parse[parser]) {
+                current_event = parser_feed(parsers[parser], string[str_pos]);
+                to_parse[parser] = current_event->type == STRING_CMP_MAYEQ;
+                ans = (char *) event_to_action(current_event->type, string, str_pos, &flag, parser + offset);
             }
         }
     }
-    if(current_event!=NULL && (current_event->type == STRING_CMP_NEQ || current_event->type == STRING_CMP_MAYEQ))
-        post_incorrect_lines();
+    if(current_event!=NULL && (current_event->type == STRING_CMP_NEQ || current_event->type == STRING_CMP_MAYEQ)) {
+        if(con_type == TCP) {
+            post_incorrect_lines();
+        } else {
+            post_incorrect_datagrams();
+        }
+    }
     return ans;
 }
 
-void reset_parser_executioner(const enum command_types con_type) {
+void reset_parser_executioner(const enum connection_type con_type) {
     int max_cmd = con_type == TCP ? MAX_CMD_TCP : MAX_CMD_UDP;
     struct parser **parsers = con_type == TCP ? parsers_tcp : parsers_udp;
     int * to_parse = con_type == TCP ? to_parse_tcp : to_parse_udp;
