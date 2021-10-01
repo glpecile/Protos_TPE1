@@ -17,7 +17,7 @@ int write_client(t_client * client, char c){
     //falta chequear cant de char de buffer.
     if(client != NULL){
         int send = FALSE;
-        if(c >= US_ASCII_LIMIT || client->index >= BUFF_LIMIT){
+        if(c >= US_ASCII_LIMIT || (client->index >= BUFF_LIMIT && c!='\r' && c!='\n')){
             send = TRUE;
             client->buffer[client->index ++] = '\r';
             client->buffer[client->index ++] = '\n';

@@ -11,7 +11,7 @@
 #define CMD_ECHO "echo "
 #define CMD_GET_DATE "get date"
 #define CMD_GET_TIME "get time"
-#define BUFF_SIZE 101
+#define BUFF_SIZE 103
 #define US_ASCII_LIMIT 127
 //enum command_types{
 //    ECHO,

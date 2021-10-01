@@ -31,7 +31,7 @@ static void clean_read_buffer(int fd){
     }
 }
 int main(int argc, char* argv[]) {
-
+    setvbuf(stdout, NULL, _IONBF, 0);
     if(argc > MAX_ARGS ) {
         log(FATAL, "usage: %s <Server Port/Name>", argv[0]); //exits from the execution if it receives FATAL as an argument.
     }
@@ -186,11 +186,8 @@ int main(int argc, char* argv[]) {
                     }
                         //echo back the message that came in
                     else {
-                        printf("About to write %c\n", c);
+                        printf("buff_size: %d char: %c\n", clients[i]->index, c);
                         if(write_client(clients[i],c)){
-                            if(is_full(clients[i])){
-                                //limpio el buffer del read.
-                            }
                             const char * to_send;
                             char * read_ret = read_client(clients[i]);
                             if(read_ret != NULL) {
@@ -198,15 +195,20 @@ int main(int argc, char* argv[]) {
                                 send(sd, to_send, strlen(to_send), 0);
                                 reset_parser_executioner();
                             }
+//                            if(is_full(clients[i])){
+//                                send(sd, "buffer is full\n", 16, 0);
+//                                while(read(sd,&c,1)>0 && c!='\n'){
+//                                    printf("limpiando el ascii: %d\n", c);
+//                                }
+//                                send(sd, "SALIMO DEL GUAIL\n", 16, 0);
+//                            }
+
                             //set the string terminating NULL byte on the end of the data read
-
                         }
-
                     }
                 }
             }
         }
     }
-
     return 0;
 }
