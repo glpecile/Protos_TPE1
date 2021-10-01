@@ -7,38 +7,36 @@ static struct parser *parsers[MAX_CMD];
 static struct parser_definition echo_d;
 static struct parser_definition get_date_d;
 static struct parser_definition get_time_d;
+static struct parser_definition set_locale_en_d;
+static struct parser_definition set_locale_es_d;
+static struct parser_definition stats_d;
 static char to_return[BUFF_SIZE];
-static int date_format = EN;
+
 
 static const char *call_to_action(const enum command_types type, char *string, int position) {
     char *ret = NULL;
-    time_t t = time(NULL);
-    struct tm tm = *localtime(&t);
-    int len;
     switch (type) {
         case ECHO:
-            len = strlen(string + position + 1);
-            memcpy(to_return, string + position + 1, len + 1);
-            ret = to_return;
+            echo(to_return,string,position);
             break;
         case GET_DATE:
-            if(date_format == ES)
-                sprintf(to_return, "%02d-%02d-%d\r\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
-            else
-                sprintf(to_return, "%02d-%02d-%d\r\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
-            ret = to_return;
+            get_date(to_return);
             break;
         case GET_TIME:
-            sprintf(to_return, "%02d:%02d:%02d\r\n", tm.tm_hour, tm.tm_min, tm.tm_sec);
-            ret = to_return;
-            break;
-        case SET_LOCALE_ES:
-            date_format = ES;
+            get_time(to_return);
             break;
         case SET_LOCALE_EN:
-            date_format = EN;
+            printf("queremos cambiar el locale\r\n");
+            set_locale(to_return, EN);
+            break;
+        case SET_LOCALE_ES:
+            set_locale(to_return, ES);
+            break;
+        case STATS:
+            stats(to_return);
             break;
     }
+    ret = to_return;
     return ret;
 }
 
@@ -55,7 +53,7 @@ static const char *event_to_action(const enum string_cmp_event_types type, char 
             (*flag) = 0;
             break;
         case STRING_CMP_NEQ:
-            ret = "Not a valid command.\r\n";
+            ret = "Not a valid pepe.\r\n";
             (*flag)--;
             break;
     }
@@ -70,11 +68,16 @@ void init_executioner() {
     echo_d = parser_utils_strcmpi(CMD_ECHO);
     get_date_d = parser_utils_strcmpi(CMD_GET_DATE);
     get_time_d = parser_utils_strcmpi(CMD_GET_TIME);
+    set_locale_en_d = parser_utils_strcmpi(CMD_SET_LOCALE_EN);
+    set_locale_es_d = parser_utils_strcmpi(CMD_SET_LOCALE_ES);
+    stats_d = parser_utils_strcmpi(CMD_STATS);
 
     parsers[0] = parser_init(parser_no_classes(), &echo_d);
     parsers[1] = parser_init(parser_no_classes(), &get_date_d);
     parsers[2] = parser_init(parser_no_classes(), &get_time_d);
-
+    parsers[3] = parser_init(parser_no_classes(), &set_locale_en_d);
+    parsers[4] = parser_init(parser_no_classes(), &set_locale_es_d);
+    parsers[5] = parser_init(parser_no_classes(), &stats_d);
 }
 
 const char *execute(char *string) {
@@ -84,7 +87,7 @@ const char *execute(char *string) {
     const struct parser_event *current_event;
     flag = MAX_CMD;
     for (int i = 0; i<valread && string[i] != '\r' && flag; i++) {
-        for (int j = 0; j < MAX_CMD; j++) {
+        for (int j = 0; j < MAX_CMD && flag; j++) {
             if (to_parse[j]) {
                 current_event = parser_feed(parsers[j], string[i]);
                 to_parse[j] = current_event->type == STRING_CMP_MAYEQ;

@@ -9,7 +9,7 @@
  */
 #include "parser.h"
 #include <stdio.h>
-#include <time.h>
+
 enum string_cmp_event_types {
     STRING_CMP_MAYEQ,
     /** hay posibilidades de que el string sea igual */

@@ -98,7 +98,7 @@ void handle_tcp_clients(fd_set *readfds, struct sockaddr_in *address, int addrle
                 //clean_read_buffer(sd);
                 if (valread <= 0) { //CHECKEAR PORQUE ACA LO CAMBIAMOS DE == 0 A < 0
                     //A client got disconnected, print details.
-                    getpeername(sd, (struct sockaddr *) &address, (socklen_t *) &addrlen);
+                    getpeername(sd, (struct sockaddr *) address, (socklen_t *) &addrlen);
                     printf("Host disconnected , ip %s , port %d \n", inet_ntoa(address->sin_addr),
                            ntohs(address->sin_port));
 

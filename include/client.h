@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define BUFF_SIZE 13
+#define BUFF_SIZE 103
 #define BUFF_LIMIT BUFF_SIZE - 3
 #define MAX_CLIENTS 30
 #define US_ASCII_LIMIT 127

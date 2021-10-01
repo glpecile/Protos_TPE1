@@ -80,7 +80,6 @@ int main(int argc, char *argv[]) {
 
         handle_tcp_clients(&readfds, &tcp_address, tcp_addrlen, clients);
 
-        int n;
         if(FD_ISSET(udp_socket, &readfds)) {
             struct sockaddr_storage clntAddr; 			// Client address
             // Set Length of client address structure (in-out parameter)
