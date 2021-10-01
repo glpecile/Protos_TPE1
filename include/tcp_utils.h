@@ -2,6 +2,7 @@
 #define PROTOS_TPE1_TCP_UTILS_H
 
 #include "../include/client.h"
+#include "server_data.h"
 
 int setup_tcp_server_socket(const int port, struct sockaddr_in * address);
 

@@ -2,8 +2,10 @@
 
 #define BUFF_SIZE 103
 
-static int to_parse[MAX_CMD];
-static struct parser *parsers[MAX_CMD];
+static int to_parse_tcp[MAX_CMD_TCP];
+static struct parser *parsers_tcp[MAX_CMD_TCP];
+static int to_parse_udp[MAX_CMD_UDP];
+static struct parser *parsers_udp[MAX_CMD_UDP];
 static struct parser_definition echo_d;
 static struct parser_definition get_date_d;
 static struct parser_definition get_time_d;
@@ -26,7 +28,6 @@ static const char *call_to_action(const enum command_types type, char *string, i
             get_time(to_return);
             break;
         case SET_LOCALE_EN:
-            printf("queremos cambiar el locale\r\n");
             set_locale(to_return, EN);
             break;
         case SET_LOCALE_ES:
@@ -51,9 +52,10 @@ static const char *event_to_action(const enum string_cmp_event_types type, char 
         case STRING_CMP_EQ:
             ret = call_to_action(cmd, string, position);
             (*flag) = 0;
+            post_correct_lines();
             break;
         case STRING_CMP_NEQ:
-            ret = "Not a valid pepe.\r\n";
+            ret = "Not a valid command.Try again!\r\n";
             (*flag)--;
             break;
     }
@@ -61,9 +63,14 @@ static const char *event_to_action(const enum string_cmp_event_types type, char 
 }
 
 void init_executioner() {
-    for (int i = 0; i < MAX_CMD; i++) {
-        to_parse[i] = TRUE;
+    for (int i = 0; i < MAX_CMD_TCP; i++) {
+        to_parse_tcp[i] = TRUE;
+
     }
+    for (int i = 0; i < MAX_CMD_UDP; i++) {
+        to_parse_udp[i] = TRUE;
+    }
+
 
     echo_d = parser_utils_strcmpi(CMD_ECHO);
     get_date_d = parser_utils_strcmpi(CMD_GET_DATE);
@@ -72,22 +79,25 @@ void init_executioner() {
     set_locale_es_d = parser_utils_strcmpi(CMD_SET_LOCALE_ES);
     stats_d = parser_utils_strcmpi(CMD_STATS);
 
-    parsers[0] = parser_init(parser_no_classes(), &echo_d);
-    parsers[1] = parser_init(parser_no_classes(), &get_date_d);
-    parsers[2] = parser_init(parser_no_classes(), &get_time_d);
-    parsers[3] = parser_init(parser_no_classes(), &set_locale_en_d);
-    parsers[4] = parser_init(parser_no_classes(), &set_locale_es_d);
-    parsers[5] = parser_init(parser_no_classes(), &stats_d);
+    parsers_tcp[0] = parser_init(parser_no_classes(), &echo_d);
+    parsers_tcp[1] = parser_init(parser_no_classes(), &get_date_d);
+    parsers_tcp[2] = parser_init(parser_no_classes(), &get_time_d);
+    parsers_udp[0] = parser_init(parser_no_classes(), &set_locale_en_d);
+    parsers_udp[1] = parser_init(parser_no_classes(), &set_locale_es_d);
+    parsers_udp[2] = parser_init(parser_no_classes(), &stats_d);
 }
 
-const char *execute(char *string) {
+const char *execute(char *string, const enum connection_type con_type){
     int flag;
     int valread = strlen(string);
     char *ans = "";
     const struct parser_event *current_event;
-    flag = MAX_CMD;
+    int max_cmd = con_type == TCP ? MAX_CMD_TCP : MAX_CMD_UDP;
+    flag = max_cmd;
+    struct parser **parsers = con_type == TCP ? parsers_tcp : parsers_udp;
+    int * to_parse = con_type == TCP ? to_parse_tcp : to_parse_udp;
     for (int i = 0; i<valread && string[i] != '\r' && flag; i++) {
-        for (int j = 0; j < MAX_CMD && flag; j++) {
+        for (int j = 0; j < max_cmd && flag; j++) {
             if (to_parse[j]) {
                 current_event = parser_feed(parsers[j], string[i]);
                 to_parse[j] = current_event->type == STRING_CMP_MAYEQ;
@@ -95,11 +105,16 @@ const char *execute(char *string) {
             }
         }
     }
+    if(current_event!=NULL && (current_event->type == STRING_CMP_NEQ || current_event->type == STRING_CMP_MAYEQ))
+        post_incorrect_lines();
     return ans;
 }
 
-void reset_parser_executioner() {
-    for (int i = 0; i < MAX_CMD; i++) {
+void reset_parser_executioner(const enum command_types con_type) {
+    int max_cmd = con_type == TCP ? MAX_CMD_TCP : MAX_CMD_UDP;
+    struct parser **parsers = con_type == TCP ? parsers_tcp : parsers_udp;
+    int * to_parse = con_type == TCP ? to_parse_tcp : to_parse_udp;
+    for (int i = 0; i < max_cmd; i++) {
         parser_reset(parsers[i]);
         to_parse[i] = TRUE;
     }

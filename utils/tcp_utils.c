@@ -62,7 +62,7 @@ void handle_incoming_connection(int master_socket, struct sockaddr_in *address, 
     if ((new_socket = accept(master_socket, (struct sockaddr *) address, (socklen_t *) &addrlen)) < 0) {
         log(FATAL, "accept failed.");
     }
-
+    post_connections();
     //inform user of socket number - used in send and receive commands
     printf("New connection, socket fd is %d, ip is: %s, port: %d \n", new_socket, inet_ntoa(address->sin_addr),
            ntohs(address->sin_port));
@@ -115,9 +115,9 @@ void handle_tcp_clients(fd_set *readfds, struct sockaddr_in *address, int addrle
                         const char *to_send;
                         char *read_ret = read_client(clients[i]);
                         if (read_ret != NULL) {
-                            to_send = execute(read_ret);
+                            to_send = execute(read_ret, TCP);
                             send(sd, to_send, strlen(to_send), 0);
-                            reset_parser_executioner();
+                            reset_parser_executioner(TCP);
                         }
 //                            if(is_full(clients[i])){
 //                                send(sd, "buffer is full\n", 16, 0);

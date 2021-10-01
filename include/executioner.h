@@ -9,7 +9,8 @@
 #include <stdlib.h>
 
 
-#define MAX_CMD 6
+#define MAX_CMD_TCP 3
+#define MAX_CMD_UDP 3
 #define TRUE 1
 #define FALSE 0
 #define CMD_ECHO "echo "
@@ -28,11 +29,15 @@ enum command_types{
     SET_LOCALE_ES,
     STATS
 };
+enum connection_type{
+    TCP,
+    UDP
+};
 
 
 void init_executioner();
 
-const char *execute(char *string);
+const char *execute(char *string, const enum connection_type con_type);
 
 void reset_parser_executioner();
 
