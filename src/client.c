@@ -21,22 +21,22 @@ void destroy_client(t_client *client) {
 }
 
 int write_client(t_client *client, char c) {
-    //falta chequear cant de char de buffer.
     if (client != NULL) {
         int send = FALSE;
-        if (c >= US_ASCII_LIMIT || (client->index >= BUFF_LIMIT && c != '\r' && c != '\n')) {
+        if ((unsigned char) c >= US_ASCII_LIMIT || (client->index >= BUFF_LIMIT && c != '\r' && c != '\n')) {
             send = TRUE;
             client->buffer[client->index++] = '\r';
             client->buffer[client->index++] = '\n';
-            client->buffer[client->index + 1] = '\0';
+            client->buffer[client->index++] = '\0';
+            client->index = BUFF_SIZE;
         } else {
             client->buffer[client->index] = c;
             if ((client->index != 0 && (c == '\n' && client->buffer[client->index - 1] == '\r'))) {
                 client->buffer[client->index + 1] = '\0';
                 send = TRUE;
             }
+            client->index++;
         }
-        client->index++;
         return send;
     }
     return 0;
@@ -50,7 +50,7 @@ char *read_client(t_client *client) {
     return NULL;
 }
 
-int is_full(t_client *client) {
+int is_invalid(t_client *client) {
     return client->index == BUFF_SIZE;
 }
 
