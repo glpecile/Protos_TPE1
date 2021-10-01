@@ -9,7 +9,7 @@
  */
 #include "parser.h"
 #include <stdio.h>
-#include <time.h>
+
 enum string_cmp_event_types {
     STRING_CMP_MAYEQ,
     /** hay posibilidades de que el string sea igual */
@@ -17,14 +17,11 @@ enum string_cmp_event_types {
     /** NO hay posibilidades de que el string sea igual */
     STRING_CMP_NEQ,
 };
-enum command_types{
-    ECHO,
-    GET_DATE,
-    GET_TIME,
-};
+
+
 
 const char *
-parser_utils_strcmpi_event(const enum string_cmp_event_types type, char * s, int position, int * flag, const enum command_types command);
+parser_utils_strcmpi_event(const enum string_cmp_event_types type);
 
 
 /*

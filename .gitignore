@@ -9,3 +9,5 @@ CMakeLists.txt
 server
 
 server.dSYM/Contents/
+
+tests
