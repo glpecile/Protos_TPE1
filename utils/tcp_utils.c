@@ -67,8 +67,8 @@ void handle_incoming_connection(int master_socket, struct sockaddr_in *address, 
     }
 
     //inform user of socket number - used in send and receive commands
-    printf("New connection, socket fd is %d, ip is: %s, port: %d \n", new_socket, inet_ntoa(address->sin_addr),
-           ntohs(address->sin_port));
+    log(INFO, "New connection, socket fd is %d, ip is: %s, port: %d", new_socket, inet_ntoa(address->sin_addr),
+        ntohs(address->sin_port));
 
     if (*current_tcp_clients < MAX_CLIENTS) {
         //send new connection greeting message
@@ -76,13 +76,10 @@ void handle_incoming_connection(int master_socket, struct sockaddr_in *address, 
             log(FATAL, "Send error");
         }
 
-        printf("Welcome message sent successfully\n");
-
         //add new socket socket to array of sockets
         for (int i = 0; i < MAX_CLIENTS; i++) {
             if (clients[i] == NULL) {
                 clients[i] = init_client(new_socket);
-                printf("Adding to list of sockets as %d\n", i);
                 post_connections();
                 (*current_tcp_clients)++;
                 break;
@@ -111,23 +108,18 @@ void handle_tcp_clients(fd_set *readfds, struct sockaddr_in *address, int addrle
                 char c;
                 //check if it was for closing, and also the incoming message
                 valread = read(sd, &c, 1);
-                //clean_read_buffer(sd);
-                if (valread <= 0) { //CHECKEAR PORQUE ACA LO CAMBIAMOS DE == 0 A < 0
+                if (valread <= 0) {
                     //A client got disconnected, print details.
                     getpeername(sd, (struct sockaddr *) address, (socklen_t *) &addrlen);
-                    printf("Host disconnected , ip %s , port %d \n", inet_ntoa(address->sin_addr),
-                           ntohs(address->sin_port));
+                    log(INFO, "Host disconnected , ip %s , port %d \n", inet_ntoa(address->sin_addr),
+                        ntohs(address->sin_port));
 
-                    //Close the socket and mark as SET_EMPTY in list for reuse
+                    //Close the socket and mark as NULL in list for reuse
                     close(sd);
-//                        client_socket[i] = SET_EMPTY;
                     destroy_client(clients[i]);
                     clients[i] = NULL;
                     (*current_tcp_clients)--;
-                }
-                    //echo back the message that came in
-                else {
-                    printf("buff_size: %d char: %c\n", clients[i]->index, c);
+                } else {
                     if (write_client(clients[i], c)) {
                         const char *to_send;
                         char *read_ret = read_client(clients[i]);
@@ -137,14 +129,9 @@ void handle_tcp_clients(fd_set *readfds, struct sockaddr_in *address, int addrle
                             reset_parser_executioner(TCP);
                         }
 //                            if(is_full(clients[i])){
-//                                send(sd, "buffer is full\n", 16, 0);
 //                                while(read(sd,&c,1)>0 && c!='\n'){
-//                                    printf("limpiando el ascii: %d\n", c);
 //                                }
-//                                send(sd, "SALIMO DEL GUAIL\n", 16, 0);
 //                            }
-
-                        //set the string terminating NULL byte on the end of the data read
                     }
                 }
             }

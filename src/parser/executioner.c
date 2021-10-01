@@ -77,7 +77,6 @@ void init_executioner() {
         to_parse_udp[i] = TRUE;
     }
 
-
     echo_d = parser_utils_strcmpi(CMD_ECHO);
     get_date_d = parser_utils_strcmpi(CMD_GET_DATE);
     get_time_d = parser_utils_strcmpi(CMD_GET_TIME);

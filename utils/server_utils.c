@@ -36,7 +36,8 @@ int setup_server_socket(const int port, struct sockaddr_in *address, int sock_ty
         }
         log(FATAL, "bind failed")
     }
-    printf("Listener on port %d\n", port);
+
+    log(INFO, "Listener on port %d", port);
 
     return master_socket;
 }

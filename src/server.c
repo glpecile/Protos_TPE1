@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 
     tcp_addrlen = sizeof(tcp_address);
 
-    puts("Waiting for connections ...");
+    log(INFO, "Waiting for connections ...");
 
     while (TRUE) {
         int max_tcp_sd = fill_set(master_socket, &readfds, clients);
@@ -69,8 +69,8 @@ int main(int argc, char *argv[]) {
     }
 
     destroy_executioner();
-    for(int i = 0; i < MAX_CLIENTS; i++) {
-        if(clients[i] != NULL) {
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        if (clients[i] != NULL) {
             destroy_client(clients[i]);
         }
     }
