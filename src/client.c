@@ -1,4 +1,9 @@
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "../include/client.h"
+#include "../include/tools.h"
 
 t_client *init_client(int fd) {
     t_client *ret = malloc(sizeof(*ret));

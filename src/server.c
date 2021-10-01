@@ -13,10 +13,7 @@
 #define DEFAULT_PORT 9999 //Preferred port
 #define MAX_ARGS  2
 
-static t_client *clients[MAX_CLIENTS] = {NULL};
-
 int main(int argc, char *argv[]) {
-    setvbuf(stdout, NULL, _IONBF, 0);
     if (argc > MAX_ARGS) {
         log(FATAL, "usage: %s <Server Port/Name>",
             argv[0]); //exits from the execution if it receives FATAL as an argument.
@@ -24,14 +21,14 @@ int main(int argc, char *argv[]) {
     //Defining port: DEFAULT_PORT or the port given by the user.
     int port = (argc == 1) ? DEFAULT_PORT : atoi(argv[1]);
 
-    int master_socket, max_sd, max_tcp_sd, activity;
+    int master_socket;
     int current_tcp_clients = 0;
     int udp_socket;
     struct sockaddr_in tcp_address;
     struct sockaddr_in udp_address;
     int tcp_addrlen;
     fd_set readfds; //set of socket descriptors
-
+    t_client *clients[MAX_CLIENTS] = {NULL};
 
     if (close(STDIN_FILENO)) {
         log(FATAL, "closing STDIN failed.")
@@ -51,11 +48,11 @@ int main(int argc, char *argv[]) {
     puts("Waiting for connections ...");
 
     while (TRUE) {
-        max_tcp_sd = fill_set(master_socket, &readfds, clients);
+        int max_tcp_sd = fill_set(master_socket, &readfds, clients);
         FD_SET(udp_socket, &readfds);
-        max_sd = max_tcp_sd > udp_socket ? max_tcp_sd : udp_socket;
+        int max_sd = max_tcp_sd > udp_socket ? max_tcp_sd : udp_socket;
         //waiting for one of the sockets, timeout is NULL.
-        activity = select(max_sd + 1, &readfds, NULL, NULL, NULL);
+        int activity = select(max_sd + 1, &readfds, NULL, NULL, NULL);
 
         if ((activity < 0) && (errno != EINTR)) {
             log(FATAL, "select error.");
@@ -69,6 +66,13 @@ int main(int argc, char *argv[]) {
         handle_tcp_clients(&readfds, &tcp_address, tcp_addrlen, clients, &current_tcp_clients);
 
         handle_udp_datagrams(&readfds, udp_socket);
+    }
+
+    destroy_executioner();
+    for(int i = 0; i < MAX_CLIENTS; i++) {
+        if(clients[i] != NULL) {
+            destroy_client(clients[i]);
+        }
     }
     return 0;
 }

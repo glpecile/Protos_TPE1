@@ -1,4 +1,8 @@
+#include <string.h>
+#include <stdlib.h>
+
 #include "../../include/executioner.h"
+#include "../../include/tools.h"
 
 #define BUFF_SIZE 103
 
@@ -128,5 +132,14 @@ void reset_parser_executioner(const enum connection_type con_type) {
     }
     for (int j = 0; j < BUFF_SIZE; j++) {
         to_return[j] = 0;
+    }
+}
+
+void destroy_executioner() {
+    for(int i = 0; i < MAX_CMD_TCP; i++) {
+        parser_destroy(parsers_tcp[i]);
+    }
+    for(int i = 0; i < MAX_CMD_UDP; i++) {
+        parser_destroy(parsers_udp[i]);
     }
 }

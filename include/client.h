@@ -1,16 +1,13 @@
 #ifndef PROTOS_TPE1_CLIENT_H
 #define PROTOS_TPE1_CLIENT_H
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include "../include/client.h"
 
 #define BUFF_SIZE 103
 #define BUFF_LIMIT BUFF_SIZE - 3
 #define MAX_CLIENTS 30
 #define US_ASCII_LIMIT 127
-#define TRUE 1
-#define FALSE 0
+
 typedef struct {
     char buffer[BUFF_SIZE];
     int index;

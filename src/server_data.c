@@ -1,3 +1,7 @@
+#include <time.h>
+#include <string.h>
+#include <stdio.h>
+
 #include "../include/server_data.h"
 static int correct_lines;
 static int incorrect_lines;
@@ -28,27 +32,19 @@ void set_locale(char * dest, const enum date_format l){
 void stats(char * dest){
     sprintf(dest, "STATS:\n-Connections: %d\n-Incorrect Lines: %d\n-Correct Lines: %d\n-Incorrect Datagrams: %d\r\n", connections, incorrect_lines, correct_lines, incorrect_datagrams);
 }
-int get_correct_lines(){
-    return correct_lines;
-}
+
 int post_correct_lines(){
     return correct_lines++;
 }
-int get_incorrect_lines(){
-    return incorrect_lines;
-}
+
 int post_incorrect_lines(){
     return incorrect_lines++;
 }
-int get_incorrect_datagrams(){
-    return incorrect_datagrams;
-}
+
 int post_incorrect_datagrams(){
     return incorrect_datagrams++;
 }
-int get_connections(){
-    return connections;
-}
+
 int post_connections(){
     return connections++;
 }

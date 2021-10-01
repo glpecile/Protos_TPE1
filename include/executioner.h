@@ -1,18 +1,11 @@
-
-
 #ifndef PROTOS_TPE1_EXECUTIONER_H
 #define PROTOS_TPE1_EXECUTIONER_H
 
 #include "parser_utils.h"
 #include "server_data.h"
-#include <string.h>
-#include <stdlib.h>
-
 
 #define MAX_CMD_TCP 3
 #define MAX_CMD_UDP 3
-#define TRUE 1
-#define FALSE 0
 #define CMD_ECHO "echo "
 #define CMD_GET_DATE "get date"
 #define CMD_GET_TIME "get time"
@@ -21,7 +14,7 @@
 #define CMD_STATS "stats"
 
 #define US_ASCII_LIMIT 127
-enum command_types{
+enum command_types {
     ECHO,
     GET_DATE,
     GET_TIME,
@@ -29,7 +22,7 @@ enum command_types{
     SET_LOCALE_ES,
     STATS
 };
-enum connection_type{
+enum connection_type {
     TCP,
     UDP
 };

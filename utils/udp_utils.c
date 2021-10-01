@@ -9,6 +9,7 @@
 #include "../include/server_utils.h"
 #include "../include/logger.h"
 #include "../include/executioner.h"
+#include "../include/server_data.h"
 
 #define BUFF_SIZE 100
 

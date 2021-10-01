@@ -10,6 +10,7 @@
 #include "../include/client.h"
 #include "../include/executioner.h"
 #include "../include/server_utils.h"
+#include "../include/server_data.h"
 
 #define PENDING_CONNECTIONS 3
 
@@ -92,7 +93,7 @@ void handle_incoming_connection(int master_socket, struct sockaddr_in *address, 
             log(FATAL, "Send error");
         }
         log(INFO, "Server is full. Client connection rejected.\n");
-        if(close(new_socket) < 0) {
+        if (close(new_socket) < 0) {
             log(FATAL, "Close error");
         }
     }
