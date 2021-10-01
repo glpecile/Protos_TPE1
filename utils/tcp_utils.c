@@ -28,15 +28,17 @@ int setup_tcp_server_socket(const int port, struct sockaddr_in *address) {
     return master_socket;
 }
 
-int fill_set(int master_socket, fd_set *readfds, t_client *clients[]) {
-    int sd, max_sd;
+int fill_set(int master_socket, fd_set *readfds, t_client *clients[], int *current_tcp_clients) {
+    int sd, max_sd = 0;
 
     //clear the socket set
     FD_ZERO(readfds);
 
     //add master socket to set
-    FD_SET(master_socket, readfds);
-    max_sd = master_socket;
+    if (*current_tcp_clients < MAX_CLIENTS) {
+        FD_SET(master_socket, readfds);
+        max_sd = master_socket;
+    }
 
     //add child sockets to set
     for (int i = 0; i < MAX_CLIENTS; i++) {
@@ -60,7 +62,6 @@ void handle_incoming_connection(int master_socket, struct sockaddr_in *address, 
                                 int *current_tcp_clients) {
     int new_socket;
     char *message = "ECHO Daemon v1.0\r\n";
-    char *full_server_msg = "The server is full\r\n";
 
     if ((new_socket = accept(master_socket, (struct sockaddr *) address, (socklen_t *) &addrlen)) < 0) {
         log(FATAL, "accept failed.");
@@ -70,28 +71,18 @@ void handle_incoming_connection(int master_socket, struct sockaddr_in *address, 
     log(INFO, "New connection, socket fd is %d, ip is: %s, port: %d", new_socket, inet_ntoa(address->sin_addr),
         ntohs(address->sin_port));
 
-    if (*current_tcp_clients < MAX_CLIENTS) {
-        //send new connection greeting message
-        if (send(new_socket, message, strlen(message), 0) != strlen(message)) {
-            log(FATAL, "Send error");
-        }
+    //send new connection greeting message
+    if (send(new_socket, message, strlen(message), 0) != strlen(message)) {
+        log(FATAL, "Send error");
+    }
 
-        //add new socket socket to array of sockets
-        for (int i = 0; i < MAX_CLIENTS; i++) {
-            if (clients[i] == NULL) {
-                clients[i] = init_client(new_socket);
-                post_connections();
-                (*current_tcp_clients)++;
-                break;
-            }
-        }
-    } else {
-        if (send(new_socket, full_server_msg, strlen(full_server_msg), 0) != strlen(full_server_msg)) {
-            log(FATAL, "Send error");
-        }
-        log(INFO, "Server is full. Client connection rejected.\n");
-        if (close(new_socket) < 0) {
-            log(FATAL, "Close error");
+    //add new socket socket to array of sockets
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        if (clients[i] == NULL) {
+            clients[i] = init_client(new_socket);
+            post_connections();
+            (*current_tcp_clients)++;
+            break;
         }
     }
 }
@@ -101,7 +92,6 @@ void handle_tcp_clients(fd_set *readfds, struct sockaddr_in *address, int addrle
     int sd, valread;
     //if it's some IO operation regarding one of the "old" clients.
     for (int i = 0; i < MAX_CLIENTS; i++) {
-//            sd = client_socket[i];
         if (clients[i] != NULL) {
             sd = clients[i]->fd;
             if (FD_ISSET(sd, readfds)) {
@@ -120,7 +110,11 @@ void handle_tcp_clients(fd_set *readfds, struct sockaddr_in *address, int addrle
                     clients[i] = NULL;
                     (*current_tcp_clients)--;
                 } else {
-                    if (write_client(clients[i], c)) {
+                    int send_flag = write_client(clients[i], c);
+                    if (is_invalid(clients[i])) {
+                        while (c != '\n' && read(sd, &c, 1) > 0);
+                    }
+                    if (send_flag) {
                         const char *to_send;
                         char *read_ret = read_client(clients[i]);
                         if (read_ret != NULL) {
@@ -128,10 +122,6 @@ void handle_tcp_clients(fd_set *readfds, struct sockaddr_in *address, int addrle
                             send(sd, to_send, strlen(to_send), 0);
                             reset_parser_executioner(TCP);
                         }
-//                            if(is_full(clients[i])){
-//                                while(read(sd,&c,1)>0 && c!='\n'){
-//                                }
-//                            }
                     }
                 }
             }

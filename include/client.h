@@ -22,6 +22,6 @@ int write_client(t_client *client, char c);
 
 char *read_client(t_client *client);
 
-int is_full(t_client *client);
+int is_invalid(t_client *client);
 
 #endif //PROTOS_TPE1_CLIENT_H

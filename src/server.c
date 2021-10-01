@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
     log(INFO, "Waiting for connections ...");
 
     while (TRUE) {
-        int max_tcp_sd = fill_set(master_socket, &readfds, clients);
+        int max_tcp_sd = fill_set(master_socket, &readfds, clients, &current_tcp_clients);
         FD_SET(udp_socket, &readfds);
         int max_sd = max_tcp_sd > udp_socket ? max_tcp_sd : udp_socket;
         //waiting for one of the sockets, timeout is NULL.
