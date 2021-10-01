@@ -36,11 +36,20 @@ make all
         *   Cantidad de líneas correctas recibidas.
         *   Cantidad de datagramas incorrectos recibidos (incluye comandos inválidos o inexistentes).
 *   El servidor para tanto UDP como TCP se encuentra en el puerto 9999, esto se puede cambiar por linea de comando.
+*   La limpieza de los archivos generados se realiza con el siguiente comando:
+
+```bash
+make clean
+```
 
 ## Testeo
-
 Para el testeo con tanto **Cppcheck** como **Valgrind**. Correr el siguiente comando:
 
 ```bash
  make test
+```
+La limpieza de los achivos generados durante el testeo se realiza con el siguiente comando:
+
+```bash
+make cleanTest
 ```
