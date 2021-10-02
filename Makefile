@@ -1,6 +1,6 @@
 .PHONY : all clean test cleanTest server
 COMPILER=gcc
-CFLAGS = -Wall -fsanitize=address -g
+CFLAGS = -Wall -fsanitize=address -g -pedantic -std=c99
 all: server
 clean:
 	- rm -f *.o  server

@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <unistd.h>   //close
 #include <arpa/inet.h>    //close
+#include <sys/select.h>
 #include "../include/tools.h"
 #include "../include/logger.h"
 #include "../include/executioner.h"
@@ -31,7 +32,7 @@ int main(int argc, char *argv[]) {
     t_client *clients[MAX_CLIENTS] = {NULL};
 
     if (close(STDIN_FILENO)) {
-        log(FATAL, "closing STDIN failed.")
+        log(FATAL, "closing STDIN failed.");
     }
 
     //Initialize tcp master_socket
