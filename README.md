@@ -15,10 +15,13 @@ El objetivo del TPE1 es el diseño de un protocolo extensión del protocolo `ECH
 *   Conexión **TCP** que acepta:
     *   El recibir líneas de texto US-ASCII (se ignoran hasta el final de la linea si no contiene) finalizadas con `\r\n`.
     *   Cada linea tiene que ser de menos de 100 lineas (no se tienen en cuenta \n\r). Si se supera dicho largo los caracteres son ignoroados.
-    *    Se aceptan únicamente los siguientes comandos
-        *   `ECHO texto\r\n` - donde el servidor le enviará como respuesta al cliente el texto recibido, finalizado con `\r\n`.
-        *   `GET date\r\n` - donde el servidor responde con una línea de texto con la fecha actual, por defecto en formato dd/MM/yyyy.
-        *   `GET time\r\n` - el servidor responde con una línea de texto con la hora en forma hh:mm:ss.
+    *    Se aceptan únicamente los siguientes comandos:
+        *   ```ECHO texto\r\n``` 
+        donde el servidor le enviará como respuesta al cliente el texto recibido, finalizado con `\r\n`.
+        *   ```GET date\r\n```
+        donde el servidor responde con una línea de texto con la fecha actual, por defecto en formato dd/MM/yyyy.
+        *   ```GET time\r\n```
+        el servidor responde con una línea de texto con la hora en forma hh:mm:ss.
 
 *   Conexión **UDP** que acepta los siguientes datagramas:
     *   `SET locale en` - cambia el formato de las fechas a MM/dd/yyyy.
