@@ -18,7 +18,7 @@ void get_date(char * dest){
     if(locale == ES)
         sprintf(dest, "%02d-%02d-%d\r\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
     else
-        sprintf(dest, "%02d-%02d-%d\r\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+        sprintf(dest, "%02d-%02d-%d\r\n", tm.tm_mon + 1, tm.tm_mday, tm.tm_year + 1900);
 }
 void get_time(char * dest){
     time_t t = time(NULL);

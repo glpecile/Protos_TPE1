@@ -33,6 +33,7 @@ void handle_udp_datagrams(fd_set *readfds, int udp_socket) {
             log(ERROR, "recvfrom() failed: %s ", strerror(errno));
         } else if (valread >= BUFF_SIZE) {
             log(ERROR, "recvfrom() failed: Datagram exceed max supported size");
+            post_incorrect_datagrams();
         } else {
             answer = execute(buffer, UDP);
             int bytes_to_sent = strlen(answer);

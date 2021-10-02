@@ -12,13 +12,6 @@
 El objetivo del TPE1 es el diseño de un protocolo extensión del protocolo `ECHO`, a su vez se tiene que implementar un servidor concurrente.
 
 ## Funcionalidades
-
-*   La compilación se realiza con el siguiente comando:
-
-```bash
-make all
-```
-
 *   Conexión **TCP** que acepta:
     *   El recibir líneas de texto US-ASCII (se ignoran hasta el final de la linea si no contiene) finalizadas con `\r\n`.
     *   Cada linea tiene que ser de menos de 100 lineas (no se tienen en cuenta \n\r). Si se supera dicho largo los caracteres son ignoroados.
@@ -36,17 +29,39 @@ make all
         *   Cantidad de líneas correctas recibidas.
         *   Cantidad de datagramas incorrectos recibidos (incluye comandos inválidos o inexistentes).
 *   El servidor para tanto UDP como TCP se encuentra en el puerto 9999, esto se puede cambiar por linea de comando.
-*   La limpieza de los archivos generados se realiza con el siguiente comando:
+
+
+## Compilación
+
+La compilación se realiza con el siguiente comando:
 
 ```bash
-make clean
+make all
 ```
 
+## Ejecución
+
+La ejecución se realiza con el siguiente comando:
+
+```bash
+./server <port>
+```
+Por defecto, el puerto utilizado es 9999.
+
 ## Testeo
-Para el testeo con tanto **Cppcheck** como **Valgrind**. Correr el siguiente comando:
+Para el testeo tanto con **Cppcheck** como **Valgrind**. Correr el siguiente comando:
 
 ```bash
  make test
+```
+
+
+## Limpieza
+
+La limpieza de los archivos generados se realiza con el siguiente comando:
+
+```bash
+make clean
 ```
 La limpieza de los achivos generados durante el testeo se realiza con el siguiente comando:
 
