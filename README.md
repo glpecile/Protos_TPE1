@@ -15,17 +15,23 @@ El objetivo del TPE1 es el diseño de un protocolo extensión del protocolo `ECH
 *   Conexión **TCP** que acepta:
     *   El recibir líneas de texto US-ASCII (se ignoran hasta el final de la linea si no contiene) finalizadas con `\r\n`.
     *   Cada linea tiene que ser de menos de 100 lineas (no se tienen en cuenta \n\r). Si se supera dicho largo los caracteres son ignoroados.
-    *    Se aceptan únicamente los siguientes comandos:
-        *   ```ECHO texto\r\n``` 
-        donde el servidor le enviará como respuesta al cliente el texto recibido, finalizado con `\r\n`.
-        *   ```GET date\r\n```
-        donde el servidor responde con una línea de texto con la fecha actual, por defecto en formato dd/MM/yyyy.
-        *   ```GET time\r\n```
-        el servidor responde con una línea de texto con la hora en forma hh:mm:ss.
+    *    Se aceptan únicamente los siguientes comandos:        
+```bash
+ECHO texto\r\n
+```
+   donde el servidor le enviará como respuesta al cliente el texto recibido, finalizado con `\r\n`.
+```bash
+GET date\r\n
+```
+   donde el servidor responde con una línea de texto con la fecha actual, por defecto en formato _dd/MM/yyyy_.
+```bash
+GET time\r\n
+```        
+   el servidor responde con una línea de texto con la hora en forma _hh:mm:ss_.
 
 *   Conexión **UDP** que acepta los siguientes datagramas:
-    *   `SET locale en` - cambia el formato de las fechas a MM/dd/yyyy.
-    *   `SET local es` - cambia el formato de las fechas a dd/MM/yyyy.
+    *   `SET locale en` - cambia el formato de las fechas a _MM/dd/yyyy_.
+    *   `SET local es` - cambia el formato de las fechas a _dd/MM/yyyy_.
     *   `STATS` - se obtiene un datagrama con las siguientes estadísticas en modo texto (cada una separada por `\r\n`):
         *   Cantidad de conexiones realizadas desde que inició la ejecución.
         *   Cantidad de líneas incorrectas recibidas.
@@ -57,7 +63,6 @@ Para el testeo tanto con **Cppcheck** como **Valgrind**. Correr el siguiente com
 ```bash
  make test
 ```
-
 
 ## Limpieza
 
